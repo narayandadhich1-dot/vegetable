@@ -43,7 +43,7 @@ const Shop = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const res = await API.get("/api/v1/vegetable/get");
+                const res = await API.get("/vegetable/get");
                 if (res.data.success) {
                     dispatch(setAllVegetables(res.data.vegetables));
                 }
