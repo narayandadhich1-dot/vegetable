@@ -1,11 +1,31 @@
 import React from 'react';
 import { Card, CardMedia, CardContent, Typography, Button, Box, Chip } from '@mui/material';
 import { AddShoppingCart } from '@mui/icons-material';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux'; // Added useSelector
+import { useNavigate } from 'react-router-dom'; // Added useNavigate
 import { addToCart } from '../redux/cartSlice';
 
 const ProductCard = ({ product }) => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    
+    // Check if user is logged in from your auth state
+    const { user } = useSelector((state) => state.auth);
+
+  const handleAddToCart = () => {
+    console.log("USER STATE:", user);
+
+    const token = localStorage.getItem("token");
+
+    if (!user || !token) {
+        toast.error("Please login to add items");
+        navigate('/login');
+        return;
+    }
+
+    dispatch(addToCart(product));
+    toast.success(`${product.name} added to cart!`);
+};
 
     return (
         <Card elevation={0} sx={{ 
@@ -34,7 +54,7 @@ const ProductCard = ({ product }) => {
                         variant="contained" 
                         size="small" 
                         startIcon={<AddShoppingCart />}
-                        onClick={() => dispatch(addToCart(product))}
+                        onClick={handleAddToCart} // Updated this to use our new function
                         sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 700 }}
                     >
                         Add

@@ -11,25 +11,39 @@ import toast from 'react-hot-toast';
 import { addToCart } from '../redux/cartSlice';
 
 const Shop = () => {
+
     const dispatch = useDispatch();
-    const addToCartHandler = (product) => {
-    dispatch(addToCart({
-        _id: product._id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        weight: product.weight,
-        quantity: 1 // Default to 1 when first added
-    }));
-    toast.success(`${product.name} added to cart!`);
-};
+
     const { allVegetables } = useSelector(state => state.vegetable);
+    const { user } = useSelector((state) => state.auth);
+
     const [loading, setLoading] = useState(true);
+
+    const addToCartHandler = (product) => {
+
+        const token = localStorage.getItem("token");
+
+        if (!user || !token) {
+            toast.error("Please login first");
+            return;
+        }
+
+        dispatch(addToCart({
+            _id: product._id,
+            name: product.name,
+            price: product.price,
+            image: product.image,
+            weight: product.weight,
+            quantity: 1
+        }));
+
+        toast.success(`${product.name} added to cart!`);
+    };
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const res = await API.get("/vegetable/get");
+                const res = await API.get("/api/v1/vegetable/get");
                 if (res.data.success) {
                     dispatch(setAllVegetables(res.data.vegetables));
                 }
@@ -39,6 +53,7 @@ const Shop = () => {
                 setLoading(false);
             }
         };
+
         fetchProducts();
     }, [dispatch]);
 
@@ -55,7 +70,6 @@ const Shop = () => {
 
             <Grid container spacing={4}>
                 {loading ? (
-                    // Show Skeletons while loading
                     [1, 2, 3, 4].map((i) => (
                         <Grid item xs={12} sm={6} md={3} key={i}>
                             <Skeleton variant="rectangular" height={250} sx={{ borderRadius: 4 }} />
@@ -78,32 +92,44 @@ const Shop = () => {
                                     image={product.image || 'https://via.placeholder.com/300'}
                                     alt={product.name}
                                 />
+
                                 <CardContent>
+
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                        <Chip label={product.category} size="small" sx={{ bgcolor: '#fff3e0', color: '#ff3d00', fontWeight: 700 }} />
-                                        <Typography variant="caption" color="text.secondary">{product.weight}</Typography>
+                                        <Chip 
+                                            label={product.category} 
+                                            size="small" 
+                                            sx={{ bgcolor: '#fff3e0', color: '#ff3d00', fontWeight: 700 }} 
+                                        />
+                                        <Typography variant="caption" color="text.secondary">
+                                            {product.weight}
+                                        </Typography>
                                     </Box>
+
                                     <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
                                         {product.name}
                                     </Typography>
+
                                     <Typography variant="h5" sx={{ color: '#ff3d00', fontWeight: 800, mb: 2 }}>
                                         ₹{product.price}
                                     </Typography>
-                                    <Button 
-    fullWidth 
-    variant="contained" 
-    startIcon={<ShoppingCart />}
-    onClick={() => addToCartHandler(product)} // Add this line
-    sx={{ 
-        borderRadius: 2, 
-        bgcolor: '#ff3d00', 
-        '&:hover': { bgcolor: '#e63600' },
-        textTransform: 'none',
-        fontWeight: 700
-    }}
->
-    Add to Cart
-</Button>
+
+                                    <Button
+                                        fullWidth
+                                        variant="contained"
+                                        startIcon={<ShoppingCart />}
+                                        onClick={() => addToCartHandler(product)}
+                                        sx={{
+                                            borderRadius: 2,
+                                            bgcolor: '#ff3d00',
+                                            '&:hover': { bgcolor: '#e63600' },
+                                            textTransform: 'none',
+                                            fontWeight: 700
+                                        }}
+                                    >
+                                        Add to Cart
+                                    </Button>
+
                                 </CardContent>
                             </Card>
                         </Grid>

@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom'; // Added useNavigate
 import { setAuthUser } from '../redux/authSlice'; // Import your action
 import API from '../services/api';
 import toast from 'react-hot-toast'; // Assuming you use react-hot-toast
+import { clearCart } from '../redux/cartSlice';
 
 const Navbar = () => {
     const dispatch = useDispatch();
@@ -19,28 +20,25 @@ const Navbar = () => {
     const handleMenu = (event) => setAnchorEl(event.currentTarget);
     const handleClose = () => setAnchorEl(null);
 
-    // --- LOGOUT HANDLER ---
+   // --- LOGOUT HANDLER ---
     const logoutHandler = async () => {
         try {
             const res = await API.get("/user/logout");
             if (res.data.success) {
-                // 1. Clear Redux state
-                dispatch(setAuthUser(null));
-                
-                // 2. Clear Local Storage (Persisted State)
-                localStorage.removeItem("persist:root");
-                
-                // 3. Close Menu and Navigate
-                handleClose();
-                navigate("/login");
-                toast.success(res.data.message);
+                toast.success(res.data.message || "Logged out successfully");
             }
         } catch (error) {
             console.error("Logout error:", error);
-            toast.error(error.response?.data?.message || "Failed to logout");
+            // We don't show a "Failed" toast here because we are 
+            // going to force the logout on the frontend anyway.
+        } finally {
+            dispatch(setAuthUser(null));
+            dispatch(clearCart()); // <--- Add this line to empty the cart UI
+            localStorage.removeItem("persist:root");
+            handleClose();
+            navigate("/login");
         }
     };
-
     return (
         <AppBar 
             position="sticky" 
