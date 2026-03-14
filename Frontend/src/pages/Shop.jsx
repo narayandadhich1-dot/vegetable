@@ -42,17 +42,18 @@ const Shop = () => {
 
     useEffect(() => {
         const fetchProducts = async () => {
-            try {
-                const res = await API.get("/vegetable/get");
-                if (res.data.success) {
-                    dispatch(setAllVegetables(res.data.vegetables));
-                }
-            } catch (error) {
-                toast.error("Failed to load products");
-            } finally {
-                setLoading(false);
-            }
-        };
+    try {
+        const res = await API.get("/vegetable/get");
+
+        dispatch(setAllVegetables(res.data.vegetables || []));
+
+    } catch (error) {
+        console.error(error);
+        toast.error("Failed to load products");
+    } finally {
+        setLoading(false);
+    }
+};
 
         fetchProducts();
     }, [dispatch]);
