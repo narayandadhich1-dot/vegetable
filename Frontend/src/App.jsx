@@ -1,4 +1,8 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setAuthUser } from './redux/authSlice';
+import API from './services/api';
 import Navbar from './components/Navbar';
 import { Box } from '@mui/material';
 import Login from './pages/Login';
@@ -17,14 +21,34 @@ import Inventory from './components/Admin/Inventory';
 import OrderManagement from './components/Admin/OrderManagement';
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await API.get("/user/profile");
+
+        if (res.data.success) {
+          dispatch(setAuthUser(res.data.user));
+          console.log("User loaded:", res.data.user); // ✅ Debug log
+        }
+
+      } catch (error) {
+        dispatch(setAuthUser(null));
+        console.log("No active session");
+      }
+    };
+
+    fetchUser();
+  }, [dispatch]);
+
   return (
     <Router>
-      <Box sx={{ minHeight: '100vh', bgcolor: '#fafafa' }}> 
-        {/* This displays the pop-up alerts across your whole app */}
+      <Box sx={{ minHeight: '100vh', bgcolor: '#fafafa' }}>
         <Toaster position="top-center" reverseOrder={false} />
-        
+
         <Navbar />
-        
+
         <Routes>
           {/* Main Pages */}
           <Route path="/" element={<Home />} />
@@ -39,6 +63,7 @@ function App() {
           <Route path="/admin/inventory" element={<Inventory />} />
           <Route path="/admin/orders" element={<OrderManagement />} />
         </Routes>
+
       </Box>
     </Router>
   );

@@ -147,3 +147,19 @@ export const updateProfile = async (req, res) => {
         console.log(error);
     }
 }
+
+export const getProfile = async (req, res) => {
+    try {
+        const userId = req.id;
+
+        const user = await User.findById(userId).select("-password");
+
+        return res.status(200).json({
+            success: true,
+            user
+        });
+
+    } catch (error) {
+        console.log(error);
+    }
+};
